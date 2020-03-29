@@ -1,0 +1,23 @@
+{
+	"auth": "private/auth.json",
+	"format": "/dh",
+	"plugins": {
+		"admin": {
+			"path": "plugins/admin.py"
+		},
+		"bridge": {
+			"path": "plugins/bridge.py"
+		},
+		"listen": {
+			"path": "plugins/listen.py"
+		},
+		"help": {
+			"path": "plugins/help.py",
+			"commands": {
+				"admin": "oh yeah yea you know wassup",
+				"bridge": "Add/remove a bridge",
+				"listen": "asdfasdfasdf"
+			}
+		}
+	}
+}
