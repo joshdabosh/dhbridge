@@ -25,10 +25,10 @@ class HelpSession:
 			if nacre.handle.isMessageEvent(update):
 				event = update.event_notification.event
 				if messageFilter(event):
-					await self.respond(event)
+					await self.respond(event, caller="h")
 		self.pearl.updateEvent.addListener(handle)
 
-	async def respond(self, event):
+	async def respond(self, event, caller=None):
 		message = self.usage
 		conversation = self.hangouts.getConversation(event=event)
 		await self.hangouts.send(message, conversation)

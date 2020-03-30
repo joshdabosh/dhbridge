@@ -1,6 +1,6 @@
-import asyncio, random
+import asyncio, random, re
 
-import nacre
+import hangups, nacre
 
 class Bridge:
     def __init__(self, pearl, config):
@@ -14,18 +14,26 @@ class Bridge:
         pass
     
     def buildHandle(self):
-        messageFilter = nacre.handle.newMessageFilter('^{}\s+bridge(\s.*)?$'.format(self.pearl.config['format']))
+        messageFilter = nacre.handle.newMessageFilter('^{}\s+bridge(\s+)+.*$'.format(self.pearl.config['format']))
         async def handle(update):
             if nacre.handle.isMessageEvent(update):
                 event = update.event_notification.event
                 if messageFilter(event):
-                    await self.respond(event)
+                    await self.respond(event, caller="h")
         self.pearl.updateEvent.addListener(handle)
 
-    async def respond(self, event):
-        incoming = re.match('^{}\s+bridge(\s.*)?.*$'.format(self.pearl.config['format']), hangups.ChatMessageEvent(event).text)
+    async def respond(self, event, caller=None):
+        incoming = re.match('^{}\s+bridge(\s.+)+.*$'.format(self.pearl.config['format']), hangups.ChatMessageEvent(event).text)
         conversation = self.hangouts.getConversation(event=event)
+
+        thing = incoming.group(1).strip()
+
+        print(caller)
+
+        await self.hangouts.send(thing, conversation)
+
+        
 
 
 def load(pearl, config):
-        return Bridge(pearl, config)
+    return Bridge(pearl, config)
