@@ -22,15 +22,26 @@ class Bridge:
                     await self.respond(event, caller="h")
         self.pearl.updateEvent.addListener(handle)
 
+
     async def respond(self, event, caller=None):
-        incoming = re.match('^{}\s+bridge(\s.+)+.*$'.format(self.pearl.config['format']), hangups.ChatMessageEvent(event).text)
-        conversation = self.hangouts.getConversation(event=event)
+        if caller=='h':
+            print("ok")
+            incoming = re.match('^{}\s+bridge(\s.+)+.*$'.format(self.pearl.config['format']), hangups.ChatMessageEvent(event).text)
+            conversation = self.hangouts.getConversation(event=event)
 
-        thing = incoming.group(1).strip()
+            thing = incoming.group(1).strip()
 
-        print(caller)
 
-        await self.hangouts.send(thing, conversation)
+            await self.hangouts.send(thing, conversation)
+
+        if caller == 'd':
+            incoming = re.match('^{}\s+bridge(\s.+)+.*$'.format(self.pearl.config['format']), event.content)
+
+            if not incoming:
+                return
+            thing = incoming.group(1).strip()
+            
+            await self.pearl.send(thing, event.channel)
 
         
 

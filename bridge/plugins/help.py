@@ -1,6 +1,6 @@
 import asyncio
-
-import nacre
+import discord
+import nacre, re
 
 class HelpSession:
 
@@ -19,6 +19,12 @@ class HelpSession:
 		for command in self.config['commands']:
 			self.usage += '<br><b>{}</b>: {}'.format(command, self.config['commands'][command])
 
+		self.discUsage = discord.Embed(title=("Commands that I understand:"), color=int("ffdead", 16))
+		for command in self.config['commands']:
+                        self.discUsage.add_field(name=command, value=self.config['commands'][command], inline=False)
+
+                
+
 	def buildHandle(self):
 		messageFilter = nacre.handle.newMessageFilter('^{}\s+help(\s.*)?$'.format(self.pearl.config['format']))
 		async def handle(update):
@@ -29,9 +35,16 @@ class HelpSession:
 		self.pearl.updateEvent.addListener(handle)
 
 	async def respond(self, event, caller=None):
-		message = self.usage
-		conversation = self.hangouts.getConversation(event=event)
-		await self.hangouts.send(message, conversation)
+                if caller == 'h':
+                        message = self.usage
+                        conversation = self.hangouts.getConversation(event=event)
+                        await self.hangouts.send(message, conversation)
+                elif caller == 'd':
+                        incoming = re.match('^{}\s+help(\s.*)?.*$'.format(self.pearl.config['format']), event.content)
+                        if not incoming:
+                                return
+
+                        await self.pearl.embed(self.discUsage, event.channel)
 
 def load(pearl, config):
 	return HelpSession(pearl, config)

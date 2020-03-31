@@ -1,6 +1,6 @@
 import asyncio, random
 
-import nacre
+import nacre, re
 
 class Listen:
     def __init__(self, pearl, config):
@@ -14,7 +14,7 @@ class Listen:
         pass
     
     def buildHandle(self):
-        messageFilter = nacre.handle.newMessageFilter('^{}\s+listen(\s.*)?$'.format(self.pearl.config['format']))
+        messageFilter = nacre.handle.newMessageFilter('^{}\s+listen\s+(\s.*)?$'.format(self.pearl.config['format']))
         async def handle(update):
             if nacre.handle.isMessageEvent(update):
                 event = update.event_notification.event
@@ -23,8 +23,14 @@ class Listen:
         self.pearl.updateEvent.addListener(handle)
 
     async def respond(self, event, caller=None):
-        incoming = re.match('^{}\s+listen(\s.*)?.*$'.format(self.pearl.config['format']), hangups.ChatMessageEvent(event).text)
-        conversation = self.hangouts.getConversation(event=event)
+
+        
+        if caller == 'h':
+            incoming = re.match('^{}\s+listen\s+(\s.*)?.*$'.format(self.pearl.config['format']), hangups.ChatMessageEvent(event).text)
+            conversation = self.hangouts.getConversation(event=event)
+
+        else:
+            pass
 
 
 def load(pearl, config):
