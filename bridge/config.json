@@ -11,12 +11,16 @@
 		"listen": {
 			"path": "plugins/listen.py"
 		},
+		"conv": {
+			"path": "plugins/conv.py"
+		},
 		"help": {
 			"path": "plugins/help.py",
 			"commands": {
 				"admin": "oh yeah yea you know wassup",
 				"bridge": "Add/remove a bridge",
-				"listen": "asdfasdfasdf"
+				"listen": "asdfasdfasdf",
+				"conv": "Get IDs of all the conversations on the OPPOSITE platform"
 			}
 		}
 	}

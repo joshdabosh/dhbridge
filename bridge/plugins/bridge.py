@@ -8,7 +8,8 @@ class Bridge:
         self.hangouts = self.pearl.hangouts
         self.config = config
         self.buildHandle()
-        self.admins = []
+        self.pearl.admins = []
+        self.pearl.bridges = {}
 
     def build(self):
         pass

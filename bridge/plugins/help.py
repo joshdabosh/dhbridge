@@ -23,8 +23,6 @@ class HelpSession:
 		for command in self.config['commands']:
                         self.discUsage.add_field(name=command, value=self.config['commands'][command], inline=False)
 
-                
-
 	def buildHandle(self):
 		messageFilter = nacre.handle.newMessageFilter('^{}\s+help(\s.*)?$'.format(self.pearl.config['format']))
 		async def handle(update):
