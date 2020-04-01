@@ -37,6 +37,7 @@ class HelpSession:
                         message = self.usage
                         conversation = self.hangouts.getConversation(event=event)
                         await self.hangouts.send(message, conversation)
+                        
                 elif caller == 'd':
                         incoming = re.match('^{}\s+help(\s.*)?.*$'.format(self.pearl.config['format']), event.content)
                         if not incoming:

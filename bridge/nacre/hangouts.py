@@ -45,7 +45,7 @@ class Hangouts:
         return self.conversations.get_all()
 
     async def getGroupChats(self):
-        return [c for c in self.getConvList() if len(c.users) >= 2]
+        return [c for c in await self.getConvList() if len(c.users) >= 2]
 
     def getConversation(self, cid=None, event=None):
         if event:

@@ -1,5 +1,5 @@
 import asyncio, random
-import hangups
+import hangups, discord
 import nacre, re
 
 class Listen:
@@ -29,11 +29,10 @@ class Listen:
             incoming = re.match('^{}\s+conv(\s.*)?.*$'.format(self.pearl.config['format']), hangups.ChatMessageEvent(event).text)
             conversation = self.hangouts.getConversation(event=event)
 
-            message = ""
-
             channs = await self.pearl.getChannels()
-            
+
             for sv, cList in channs.items():
+                message = ""
 
                 message += f"<b>{str(sv).upper()}</b>\n"
                 
@@ -42,14 +41,20 @@ class Listen:
 
                 await self.hangouts.send(message.strip(), conversation)
 
-                message = ""
-                
-
         elif caller == 'd':
             incoming = re.match('^{}\s+conv(\s.*)?.*$'.format(self.pearl.config['format']), event.content)
             if not incoming:
                 return
 
+            message = discord.Embed(color=int("ffdead", 16))
+
+            chats = await self.hangouts.getGroupChats()
+
+            for c in chats:
+                message.add_field(name=c.name, value=c.id_, inline=False)
+
+
+            await self.pearl.embed(message, event.channel)
             
 
 
