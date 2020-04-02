@@ -1,5 +1,5 @@
 import asyncio, random
-
+import hangups, discord
 import nacre, re
 
 class Listen:
@@ -8,28 +8,42 @@ class Listen:
         self.hangouts = self.pearl.hangouts
         self.config = config
         self.buildHandle()
-        self.admins = []
 
     def build(self):
         pass
     
     def buildHandle(self):
-        messageFilter = nacre.handle.newMessageFilter('^{}\s+listen\s+(\s.*)?$'.format(self.pearl.config['format']))
         async def handle(update):
             if nacre.handle.isMessageEvent(update):
                 event = update.event_notification.event
-                if messageFilter(event):
-                    await self.respond(event, caller="h")
+                await self.respond(event, caller="h")
         self.pearl.updateEvent.addListener(handle)
 
     async def respond(self, event, caller=None):
 
+        print(self.pearl.HD)
+        print()
+        print(self.pearl.DH)
         
         if caller == 'h':
-            incoming = re.match('^{}\s+listen\s+(\s.*)?.*$'.format(self.pearl.config['format']), hangups.ChatMessageEvent(event).text)
+            incoming = re.match('^(.*)$', hangups.ChatMessageEvent(event).text)
+            
             conversation = self.hangouts.getConversation(event=event)
 
-        else:
+            conv_id = conversation.id_
+            
+            if conv_id in self.pearl.HD.keys():
+                toSend = incoming.group(1).strip()
+
+                if toSend == None:
+                    return
+                
+                channel = self.pearl.discordClient.get_channel(self.pearl.HD[conv_id])
+                
+                await self.pearl.send(toSend, channel)
+
+        elif caller == 'd':
+            
             pass
 
 
