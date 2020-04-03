@@ -16,15 +16,11 @@ class Listen:
         async def handle(update):
             if nacre.handle.isMessageEvent(update):
                 event = update.event_notification.event
-                await self.respond(event, caller="h")
+                if not self.hangouts.getUser(event=event).is_self:
+                    await self.respond(event, caller="h")
         self.pearl.updateEvent.addListener(handle)
 
     async def respond(self, event, caller=None):
-
-        print(self.pearl.HD)
-        print()
-        print(self.pearl.DH)
-        
         if caller == 'h':
             incoming = re.match('^(.*)$', hangups.ChatMessageEvent(event).text)
             
@@ -33,16 +29,29 @@ class Listen:
             conv_id = conversation.id_
             
             if conv_id in self.pearl.HD.keys():
-                toSend = incoming.group(1).strip()
+                toSend = "<{}>: {}".format(self.hangouts.getUser(event=event).full_name, incoming.group(1).strip())
 
                 if toSend == None:
                     return
                 
                 channel = self.pearl.discordClient.get_channel(self.pearl.HD[conv_id])
                 
-                await self.pearl.send(toSend, channel)
+                asyncio.run_coroutine_threadsafe(self.pearl.send(toSend, channel), self.pearl.discordClient.loop)
 
         elif caller == 'd':
+            incoming = re.match('^(.*)$', event.content)
+
+            conv_id = event.channel.id
+            
+            if conv_id in self.pearl.DH.keys():
+                toSend = "<{}>: {}".format(event.author.name, incoming.group(1).strip())
+
+                if toSend == None:
+                    return
+                
+                conversation = self.hangouts.getConversation(cid=self.pearl.DH[conv_id])
+                
+                asyncio.run_coroutine_threadsafe(self.hangouts.send(toSend, conversation), self.pearl.loop)
             
             pass
 

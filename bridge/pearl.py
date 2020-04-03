@@ -41,11 +41,9 @@ class Pearl:
     def run2(self):
         self.client.on_connect.add_observer(self.hangouts.start)
         self.client.on_state_update.add_observer(self.updateEvent.fire)
-        loop = asyncio.new_event_loop()
+        self.loop = asyncio.new_event_loop()
 
-        loop.run_until_complete(self.client.connect())
-
-        loop.close()
+        self.loop.run_until_complete(self.client.connect())
 
     def run(self):
         t = Thread(target=self.run2)

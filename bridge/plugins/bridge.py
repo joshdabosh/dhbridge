@@ -42,7 +42,6 @@ class Bridge:
             incoming = re.match('^{}\s+bridge(\s.+)+.*$'.format(self.pearl.config['format']), event.content)
 
             if not incoming:
-                print("returned")
                 return
             
             thing = incoming.group(1).strip()
