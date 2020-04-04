@@ -17,9 +17,8 @@
 		"help": {
 			"path": "plugins/help.py",
 			"commands": {
-				"admin": "oh yeah yea you know wassup",
-				"bridge": "Add/remove a bridge",
-				"listen": "asdfasdfasdf",
+				"admin": "Add admins",
+				"bridge": "Add a bridge",
 				"conv": "Get IDs of all the conversations on the OPPOSITE platform"
 			}
 		}

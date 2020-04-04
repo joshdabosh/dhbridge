@@ -1,3 +1,6 @@
 __pycache__/
 private/
 .DS_STORE
+DH.json
+HD.json
+admins.json

@@ -7,16 +7,14 @@ class Bridge:
         self.pearl = pearl
         self.hangouts = self.pearl.hangouts
         self.config = config
+        self.usage = "Usage: {} bridge <chat_id> - ".format(self.pearl.config['format'])
         self.buildHandle()
-        self.pearl.admins = []
-        self.pearl.DH = {}
-        self.pearl.HD = {}
 
     def build(self):
         pass
     
     def buildHandle(self):
-        messageFilter = nacre.handle.newMessageFilter('^{}\s+bridge(\s.+)+.*$'.format(self.pearl.config['format']))
+        messageFilter = nacre.handle.newMessageFilter('^{}\s+bridge(\s.*)$'.format(self.pearl.config['format']))
         async def handle(update):
             if nacre.handle.isMessageEvent(update):
                 event = update.event_notification.event
@@ -27,28 +25,53 @@ class Bridge:
 
     async def respond(self, event, caller=None):
         if caller=='h':
-            incoming = re.match('^{}\s+bridge(\s.+)+.*$'.format(self.pearl.config['format']), hangups.ChatMessageEvent(event).text)
+            incoming = re.match('^{}\s+bridge(\s.*)$'.format(self.pearl.config['format']), hangups.ChatMessageEvent(event).text)
             conversation = self.hangouts.getConversation(event=event)
 
-            thing = incoming.group(1).strip()
+            if not str(self.hangouts.getUser(event=event).id_.gaia_id) in self.pearl.admins["h"]:
+                await self.hangouts.send("Error: not an admin", conversation)
+                return
 
+            t = incoming.group(1)
+
+            if t is None:
+                message = self.usage + "where <chat_id> is the id of the chat you wish to bridge with. See /dh conv"
+                await self.hangouts.send(message, conversation)
+                return
+            
+            thing = str(t.strip())
+            
             self.pearl.DH[thing] = conversation.id_
             self.pearl.HD[conversation.id_] = thing
-            
-            await self.hangouts.send(thing, conversation)
+
+            await self.hangouts.send('Bridged to Discord channel '+ str(thing), conversation)
             
 
         if caller == 'd':
-            incoming = re.match('^{}\s+bridge(\s.+)+.*$'.format(self.pearl.config['format']), event.content)
+            incoming = re.match('^{}\s+bridge(\s.*)$'.format(self.pearl.config['format']), event.content)
 
             if not incoming:
                 return
-            
-            thing = incoming.group(1).strip()
 
-            self.pearl.DH[event.channel.id] = thing
-            self.pearl.HD[thing] = event.channel.id
-            await self.pearl.send(thing, event.channel)
+            t = incoming.group(1)
+
+            if t is None:
+                message = self.usage + "where <chat_id> is the id of the chat you wish to bridge with. See /dh conv"
+                await self.pearl.send(message, event.channel)
+                return
+
+            if not str(event.author.id) in self.pearl.admins["d"]:
+                await self.pearl.send("Error: not an admin", event.channel)
+                return
+            
+            thing = t.strip()
+
+            self.pearl.DH[str(event.channel.id)] = thing
+            self.pearl.HD[thing] = str(event.channel.id)
+            
+            await self.pearl.send('Bridged to Hangouts chat ' + str(thing), event.channel)
+
+        self.pearl.save()
 
         
 

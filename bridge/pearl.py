@@ -8,13 +8,18 @@ import discord
 
 import nacre
 
-from multiprocessing import Process
+import lockfile
 
 class Pearl:
     def __init__(self, auth, config):
         self.auth = auth
         self.config = config
         self.client = hangups.client.Client(self.authenticate())
+        self.admins = json.load(open("admins.json"))
+
+        self.DH = json.load(open("DH.json"))
+        self.HD = json.load(open("HD.json"))
+        
         self.hangouts = nacre.hangouts.Hangouts(self.client)
         self.updateEvent = nacre.event.Event()
         self.discordClient = discord.Client()
@@ -25,7 +30,7 @@ class Pearl:
         token = hangups.RefreshTokenCache(os.path.join(os.getcwd(), self.auth['token']))
         return hangups.get_auth(authenticator, token)
 
-    def load(self):
+    def load(self):        
         self.plugins = {}
 
         plugins = self.config['plugins']
@@ -54,6 +59,23 @@ class Pearl:
 
         self.startDiscord()
 
+
+    def save(self):
+        with lockfile.LockFile("DH.json"):
+            f = open("DH.json", 'w')
+            f.write(json.dumps(self.DH))
+            f.close()
+
+        with lockfile.LockFile("HD.json"):
+            f = open("HD.json", "w")
+            f.write(json.dumps(self.HD))
+            f.close()
+
+    def saveAdmins(self):
+        with lockfile.LockFile("admins.json"):
+            f = open("admins.json", "w")
+            f.write(json.dumps(self.admins))
+            f.close()
 
 
     def startDiscord(self):

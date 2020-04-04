@@ -41,6 +41,16 @@ class Hangouts:
             uid = event.sender_id.gaia_id
         return self.users.get_user(hangups.user.UserID(uid, uid))
 
+    async def getContact(self, username=None):
+        userConvoList = await hangups.build_user_conversation_list(self.client) # Basically this lets you get a list of everyone in all your chats
+        userList, convoList = userConvoList # This is just extracting data
+        userList = userList.get_all() # Same as above
+        matches = [] # Now we start looping through data
+        for user in userList:
+            if username in (user.full_name).lower():
+                matches.append(user)
+        return matches
+    
     async def getConvList(self):
         return self.conversations.get_all()
 

@@ -13,47 +13,64 @@ class Listen:
         pass
     
     def buildHandle(self):
+        messageFilter = nacre.handle.newMessageFilter('^(?!{})\s*(.*)'.format(self.pearl.config['format']))
         async def handle(update):
             if nacre.handle.isMessageEvent(update):
                 event = update.event_notification.event
-                if not self.hangouts.getUser(event=event).is_self:
+                if not self.hangouts.getUser(event=event).is_self and messageFilter(event):
                     await self.respond(event, caller="h")
         self.pearl.updateEvent.addListener(handle)
 
     async def respond(self, event, caller=None):
         if caller == 'h':
-            incoming = re.match('^(.*)$', hangups.ChatMessageEvent(event).text)
+            incoming = re.match('^(?!{})\s*(.*)$'.format(self.pearl.config['format']), hangups.ChatMessageEvent(event).text)
             
             conversation = self.hangouts.getConversation(event=event)
 
             conv_id = conversation.id_
             
             if conv_id in self.pearl.HD.keys():
-                toSend = "<{}>: {}".format(self.hangouts.getUser(event=event).full_name, incoming.group(1).strip())
+                toSend = "**{}:** {}".format(self.hangouts.getUser(event=event).full_name, incoming.group(1).strip())
 
-                if toSend == None:
+                try:
+                    channel = self.pearl.discordClient.get_channel(int(self.pearl.HD[conv_id]))
+                    assert channel != None
+                except (AssertionError, ValueError):
+                    self.pearl.HD.pop(conv_id, 1)
+                    self.pearl.DH = {k:v for k,v in self.pearl.HD.items() if str(v) != str(conv_id)}
+
+                    await self.hangouts.send("Error sending message, bridge has been deleted.", conversation)
+
+                    self.pearl.save()
+
                     return
-                
-                channel = self.pearl.discordClient.get_channel(self.pearl.HD[conv_id])
                 
                 asyncio.run_coroutine_threadsafe(self.pearl.send(toSend, channel), self.pearl.discordClient.loop)
 
         elif caller == 'd':
-            incoming = re.match('^(.*)$', event.content)
+            incoming = re.match('^(?!{})\s*(.*)$'.format(self.pearl.config['format']), event.content)
 
-            conv_id = event.channel.id
+            if not incoming:
+                return
+            
+            conv_id = str(event.channel.id)
             
             if conv_id in self.pearl.DH.keys():
-                toSend = "<{}>: {}".format(event.author.name, incoming.group(1).strip())
+                toSend = "<b>{}:</b> {}".format(event.author.name, incoming.group(1).strip())
+                
+                try:
+                    conversation = self.hangouts.getConversation(cid=self.pearl.DH[conv_id])
+                except KeyError:
+                    self.pearl.DH.pop(conv_id, 1)
+                    self.pearl.HD = {k:v for k,v in self.pearl.HD.items() if str(v) != str(conv_id)}
 
-                if toSend == None:
+                    await self.pearl.send("Error sending message, bridge has been deleted.", event.channel)
+
+                    self.pearl.save()
+
                     return
-                
-                conversation = self.hangouts.getConversation(cid=self.pearl.DH[conv_id])
-                
+                    
                 asyncio.run_coroutine_threadsafe(self.hangouts.send(toSend, conversation), self.pearl.loop)
-            
-            pass
 
 
 def load(pearl, config):
