@@ -51,7 +51,7 @@ If you have 2FA enabled, add it as the `secret` field. If not, just leave it bla
 
 Put your Discord bot token inside `private/discToken.txt`.
 
-### RUN
+## RUN
 CD into the `bridge/` directory.
 
 Install dependencies with a `pip3 install -r requirements.txt`, and then run with `python3 pearl.py`!
